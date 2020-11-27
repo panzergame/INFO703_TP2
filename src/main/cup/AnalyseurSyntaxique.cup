@@ -35,7 +35,7 @@ parser code {:
 :};
 
 /* symboles terminaux */
-terminal PLUS, MOINS, MOINS_UNAIRE, MUL, DIV, MOD, NOT, OR, AND, PAR_G, PAR_D, SEMI, POINT, LET, INPUT, OUTPUT, IF, THEN, ELSE, WHILE, DO, EGAL, GT, GTE, NIL, ERROR; 
+terminal PLUS, MOINS, MOINS_UNAIRE, MUL, DIV, MOD, NOT, OR, AND, PAR_G, PAR_D, SEMI, POINT, LET, INPUT, OUTPUT, IF, THEN, ELSE, WHILE, DO, EGAL, LT, LTE, GT, GTE, NIL, ERROR; 
 terminal Integer ENTIER;
 terminal String IDENT;
 /* non terminaux */
@@ -46,7 +46,7 @@ precedence right OR;
 precedence right AND;
 precedence right NOT;
 precedence nonassoc EGAL;
-precedence nonassoc GT, GTE;
+precedence nonassoc GT, GTE, LT, LTE;
 precedence left PLUS, MOINS;
 precedence left MUL, DIV, MOD;
 precedence left MOINS_UNAIRE;
@@ -54,41 +54,43 @@ precedence left MOINS_UNAIRE;
 /* grammaire */
 // un pg est une sequence d'insctions terminee par point
 program ::= 
-	sequence:s POINT  
+	sequence:s POINT  {: RESULT = s; :}
 	;
 
 // une sequence est une suite d'instructions separes par des point virgules	
-sequence ::= expression:e1 SEMI sequence:e2
-	 	   | expression:e   
+sequence ::= expression:e1 SEMI sequence:e2 {: RESULT = new Arbre(Noeud.Type.SEMI, e1, e2); :} 
+	 	   | expression:e  {: RESULT = e; :}
 	 	   |
 	 	   ;
 
 // une expession est soit une affectation ,une 			 
-expression ::= expr:e 
-             | LET IDENT:nom EGAL expr:e  				
-             | WHILE expr:cond DO expression:e 
-             | IF expr:cond THEN expression:a1 ELSE expression:a2 
-             | error // reprise d'erreurs
+expression ::= expr:e {: RESULT = e; :}
+             | LET IDENT:nom EGAL expr:e  {: RESULT = new Arbre(Noeud.Type.LET, new Feuille(Noeud.Type.IDENT, nom), e); :} 				
+             | WHILE expr:cond DO expression:e  {: RESULT = new Arbre(Noeud.Type.WHILE, cond, e); :}
+             | IF expr:cond THEN expression:a1 ELSE expression:a2  {: RESULT = new Arbre(Noeud.Type.IF, cond, new Arbre(Noeud.Type.THEN, a1, a2)); :}
+             | error // reprise d'erreurs {: RESULT = new Feuille(Noeud.Type.ERROR); :}
 			 ;
 
 // 
-expr ::= NOT:op expr:e
-	   | expr:e1 AND expr:e2
-	   | expr:e1 OR expr:e2
-	   | expr:e1 EGAL expr:e2
-	   | expr:e1 GT expr:e2
-	   | expr:e1 GTE expr:e2
-	   | expr:e1 PLUS expr:e2
-	   | expr:e1 MOINS expr:e2
-	   | expr:e1 MUL expr:e2
-	   | expr:e1 DIV expr:e2
-	   | expr:e1 MOD expr:e2
-	   | MOINS expr:e			 %prec MOINS_UNAIRE 
-	   | OUTPUT expr:e
-	   | INPUT
-	   | NIL
-	   | ENTIER:n
-	   | IDENT:id
-	   | PAR_G sequence:e PAR_D
+expr ::= NOT:op expr:e {: RESULT = new Arbre(Noeud.Type.NOT, e); :}
+	   | expr:e1 AND expr:e2 {: RESULT = new Arbre(Noeud.Type.AND, e1, e2); :}
+	   | expr:e1 OR expr:e2 {: RESULT = new Arbre(Noeud.Type.OR, e1, e2); :}
+	   | expr:e1 EGAL expr:e2 {: RESULT = new Arbre(Noeud.Type.EGAL, e1, e2); :}
+	   | expr:e1 GT expr:e2 {: RESULT = new Arbre(Noeud.Type.GT, e1, e2); :}
+	   | expr:e1 GTE expr:e2 {: RESULT = new Arbre(Noeud.Type.GTE, e1, e2); :}
+	   | expr:e1 LT expr:e2 {: RESULT = new Arbre(Noeud.Type.LT, e1, e2); :}
+	   | expr:e1 LTE expr:e2 {: RESULT = new Arbre(Noeud.Type.LTE, e1, e2); :}
+	   | expr:e1 PLUS expr:e2 {: RESULT = new Arbre(Noeud.Type.PLUS, e1, e2); :}
+	   | expr:e1 MOINS expr:e2 {: RESULT = new Arbre(Noeud.Type.MOINS, e1, e2); :}
+	   | expr:e1 MUL expr:e2 {: RESULT = new Arbre(Noeud.Type.MUL, e1, e2); :}
+	   | expr:e1 DIV expr:e2 {: RESULT = new Arbre(Noeud.Type.DIV, e1, e2); :}
+	   | expr:e1 MOD expr:e2 {: RESULT = new Arbre(Noeud.Type.MOD, e1, e2); :}
+	   | MOINS expr:e {: RESULT = new Arbre(Noeud.Type.MOINS, e); :}			 %prec MOINS_UNAIRE 
+	   | OUTPUT expr:e {: RESULT = new Arbre(Noeud.Type.OUTPUT, e); :}
+	   | INPUT {: RESULT = new Feuille(Noeud.Type.INPUT, "input"); :}
+	   | NIL {: RESULT = new Feuille(Noeud.Type.NIL, "nil"); :}
+	   | ENTIER:n {: RESULT = new Feuille(Noeud.Type.ENTIER, n); :}
+	   | IDENT:id {: RESULT = new Feuille(Noeud.Type.IDENT, id); :}
+	   | PAR_G sequence:e PAR_D {: RESULT = e; :}
 	   ;
 
