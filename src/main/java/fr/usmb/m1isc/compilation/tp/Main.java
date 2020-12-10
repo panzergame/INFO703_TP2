@@ -13,11 +13,16 @@ public class Main {
 		        yy = new LexicalAnalyzer(new FileReader(args[0])) ;
 		    else
 		        yy = new LexicalAnalyzer(new InputStreamReader(System.in)) ;
+
 		@SuppressWarnings("deprecation")
 		parser p = new parser (yy);
 		Symbol root = p.parse( );
-		Noeud syntax = (Noeud)root.value;
-		System.out.println(syntax);
+		Noeud arbreAbstrait = (Noeud)root.value;
+// 		System.out.println(arbreAbstrait);
+
+		AsmGenerateur generateur = new AsmGenerateur(arbreAbstrait);
+		String asm = generateur.genererAsm();
+		System.out.println(asm);
 	}
 
 }

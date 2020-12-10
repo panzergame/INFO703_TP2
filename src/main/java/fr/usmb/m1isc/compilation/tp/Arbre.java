@@ -2,7 +2,7 @@ package fr.usmb.m1isc.compilation.tp;
 
 import java.util.ArrayList;
 
-public class Arbre extends Noeud {	
+public class Arbre extends Noeud {
 	private Noeud m_gauche;
 	private Noeud m_droit;
 
@@ -14,6 +14,14 @@ public class Arbre extends Noeud {
 
 	public Arbre(Type type, Object gauche) {
 		this(type, gauche, null);
+	}
+
+	public Noeud gauche() {
+		return m_gauche;
+	}
+
+	public Noeud droit() {
+		return m_droit;
 	}
 
 	@Override
