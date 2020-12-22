@@ -1,7 +1,5 @@
 package fr.usmb.m1isc.compilation.tp;
 
-import java.util.ArrayList;
-
 public class Arbre extends Noeud {
 	private Noeud m_gauche;
 	private Noeud m_droit;

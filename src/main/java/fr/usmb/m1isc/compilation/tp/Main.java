@@ -18,7 +18,6 @@ public class Main {
 		parser p = new parser (yy);
 		Symbol root = p.parse( );
 		Noeud arbreAbstrait = (Noeud)root.value;
-// 		System.out.println(arbreAbstrait);
 
 		AsmGenerateur generateur = new AsmGenerateur(arbreAbstrait);
 		String asm = generateur.genererAsm();
